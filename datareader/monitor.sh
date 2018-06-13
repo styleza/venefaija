@@ -13,7 +13,7 @@ function start_windmeter {
 }
 
 function start_gpslogger {
-	log "gpslogger not implemented"
+	start_process_and_lock gpslogger "python gpslogger.py"
 }
 
 function start_tempmeter {

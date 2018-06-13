@@ -1,5 +1,10 @@
 # Venefaija
 
+## Requirements
+* python
+* npm
+* sqlite
+
 ## Folder/module structure
 
 ### config
@@ -14,3 +19,5 @@ REST api to fetch data
 ### ui
 UI program
 
+### database
+SQLLite database for datareader and api
