@@ -21,30 +21,47 @@ class App extends Component {
 				this.database = new SQL.Database(new Uint8Array(resp.data));
 			});
 	}
+	_parseResult(result){
+		let returnValue = [];
+		return result.values.map(
+			(resultRow) => resultRow.reduce(
+				(r, c, i) => {
+					r[result.columns[i]] = c;
+					return r;
+				}, {}
+			)
+		);
+	}
+	_getLatestDataRow(dataType){
+		let data = this.database.exec(`select * from ${dataType} order by timestamp desc limit 1`)[0];
+		return this._parseResult(data)[0];
+	}
 	getlatestinfofromdb(){
 		let newState = {
-			lastGps: this.database.exec('select * from gps_records order by timestamp desc limit 1')[0].values[0],
-			lastWind: this.database.exec('select * from wind_records order by timestamp desc limit 1')[0].values[0]
+			lastGps: this._getLatestDataRow('gps_records'),
+			lastWind: this._getLatestDataRow('wind_records')
 		};
 		this.setState(newState);
-		console.log(newState);
 	}
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
+        <p className="App-buttons">
 		  <button onClick={this.loaddatabase.bind(this)}>LATAA DEEBEE</button>
 		  <button onClick={this.getlatestinfofromdb.bind(this)}>PÄIVITÄ INFO</button>
         </p>
 		<pre>
-			{this.state.lastGps}
-			<br/>
-			{this.state.lastWind}	
+			<b>GPS</b> <br />
+			Elevation: {this.state.lastGps.elevation} <br />
+			Heading: {this.state.lastGps.heading} <br />
+			Lat: {this.state.lastGps.lat} <br />
+			Lon: {this.state.lastGps.lon} <br />
+			Speed: {this.state.lastGps.speed} <br />
+			Last updated: {this.state.lastGps.timestamp} <br />
+			<b>Wind</b> <br />
+			Direction: {this.state.lastWind.direction} <br />
+			Speed: {this.state.lastWind.speed} <br />
+			Last updated: {this.state.lastWind.timestamp} <br />
 		</pre>
 		<Compass lastRecord={this.state.lastGps}></Compass>
       </div>

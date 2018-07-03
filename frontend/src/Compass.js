@@ -17,7 +17,7 @@ const HCConf = {
         },
         
         title: {
-            text: 'Compass'
+            text: 'GPS Direction'
         },
         
         pane: {
@@ -76,7 +76,7 @@ const HCConf = {
                 }
             },
             title: {
-                text: 'Wind direction'
+                text: 'GPS direction'
             }},
     
         series: [{
@@ -91,8 +91,8 @@ const HCConf = {
 
 class Compass extends Component {
 	componentWillReceiveProps(p){
-		if(this.handle){
-			let direction = Math.round(p.lastRecord[5]);
+		if(this.handle && p.lastRecord){
+			let direction = Math.round(p.lastRecord.heading);
 			this.handle.getChart().update({series: [{data: [direction]}]});
 		}
 	}
