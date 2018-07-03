@@ -3,7 +3,8 @@ import logo from './logo.svg';
 import './App.css';
 import SQL from 'sql.js';
 import axios from 'axios';
-import ReactHighcharts from 'react-highcharts';
+
+import Compass from './Compass.js';
 
 class App extends Component {
 	constructor(props) {
@@ -22,8 +23,8 @@ class App extends Component {
 	}
 	getlatestinfofromdb(){
 		let newState = {
-			lastGps: this.database.exec('select * from gps_records order by timestamp desc limit 1')[0].values,
-			lastWind: this.database.exec('select * from wind_records order by timestamp desc limit 1')[0].values
+			lastGps: this.database.exec('select * from gps_records order by timestamp desc limit 1')[0].values[0],
+			lastWind: this.database.exec('select * from wind_records order by timestamp desc limit 1')[0].values[0]
 		};
 		this.setState(newState);
 		console.log(newState);
@@ -45,6 +46,7 @@ class App extends Component {
 			<br/>
 			{this.state.lastWind}	
 		</pre>
+		<Compass lastRecord={this.state.lastGps}></Compass>
       </div>
     );
   }

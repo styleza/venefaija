@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
+    "highcharts": "^6.1.1",
+    "highcharts-more": "^0.1.7",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-highcharts": "^16.0.2",
