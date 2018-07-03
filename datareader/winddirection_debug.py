@@ -1,24 +1,10 @@
-import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
+import time
+
+# Import the ADS1x15 module.
 import Adafruit_ADS1x15
-from time import sleep
-import math
-import sqlite3
-
-
-PIN=18
-GPIO.setwarnings(False) # Ignore warning for now
-GPIO.setmode(GPIO.BCM) # Use physical pin numbering
-GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 10 to be an input pin and set initial value to be pulled low (off)
-
-
-count = 0
-radius_cm = 9.0		# Radius of the anemometer
-interval = 5		# How often to report speed
-ADJUSTMENT = 1.18	# Adjustment for weight of cups
-CM_IN_A_KM = 100000.0
-SECS_IN_AN_HOUR = 3600
 
 adc = Adafruit_ADS1x15.ADS1015()
+
 # Choose a gain of 1 for reading voltages from 0 to 4.09V.
 # Or pick a different gain to change the range of voltages that are read:
 #  - 2/3 = +/-6.144V
@@ -51,37 +37,13 @@ LOOKUP_TABLE=[
         {'direction': 337.5, 'data': 1331}
 ]
 
-def calculate_speed(time_sec):
-    global count
-    circumference_cm = (2 * math.pi) * radius_cm
-    rotations = count / 2.0
-
-    dist_km = (circumference_cm * rotations) / CM_IN_A_KM
-
-    km_per_sec = dist_km / time_sec
-    km_per_hour = km_per_sec * SECS_IN_AN_HOUR
-
-    return km_per_hour * ADJUSTMENT
-
-def spin(negger):
-    global count
-    count = count + 1
-
-GPIO.add_event_detect(PIN,GPIO.RISING,callback=spin)
-
-conn = sqlite3.connect('../database/database.db')
-c = conn.cursor()
-
-
 while True:
-    count = 0
-    sleep(interval)
-
     value = adc.read_adc(READ_PIN, gain=GAIN)
     direction_data = [x for x in LOOKUP_TABLE if x['data']-5 < value and x['data']+5 > value]
     if(len(direction_data) != 1):
+      print "ERRROR"
       continue
     direction = direction_data[0]['direction']
-    c.execute("INSERT INTO wind_records (speed,direction) VALUES ("+str(calculate_speed(interval))+","+str(direction)+")")
-    conn.commit()
+    print "DIR",direction,"VAL",value
+    time.sleep(READ_TIME)
 

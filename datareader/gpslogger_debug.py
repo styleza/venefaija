@@ -1,13 +1,10 @@
 import gps
 import sqlite3
-import time
+
 # Listen on port 2947 (gpsd) of localhost
 session = gps.gps("localhost", "2947")
 session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
 
-conn = sqlite3.connect('../database/database.db')
-c = conn.cursor()
-READ_TIME=5
 
 while True:
 	try:
@@ -21,6 +18,7 @@ while True:
 			lat=0
 			elevation=0
 			heading=0
+			
 			if hasattr(report, 'speed'):
 				speed=report.speed
 			if hasattr(report, 'lon'):
@@ -31,9 +29,7 @@ while True:
 				elevation=report.alt
 			if hasattr(report, 'track'):
 				heading=report.track
-			c.execute("INSERT INTO gps_records (speed,lon,lat,elevation,heading) VALUES (%f, %f, %f, %f, %f)" % (speed, lon, lat, elevation, heading))
-			conn.commit()
-                        time.sleep(READ_TIME)
+                        print "(%f, %f, %f, %f, %f)" % (speed, lon, lat, elevation, heading)
 	except KeyError:
 		pass
 	except KeyboardInterrupt:
