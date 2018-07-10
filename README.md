@@ -92,6 +92,6 @@ To start development server run `npm run start`
 ### API
 @TODO
 
-## Raspberry PI setup
+## Raspberry PI physical setup
 @TODO: image about connection schematics
 

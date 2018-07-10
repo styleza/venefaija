@@ -3,9 +3,10 @@ import logo from './logo.svg';
 import './App.css';
 import SQL from 'sql.js';
 import axios from 'axios';
+import './../node_modules/leaflet/dist/leaflet.css'
 
 import Compass from './Compass.js';
-
+import Map from './Map.js';
 class App extends Component {
 	constructor(props) {
 		super(props);
@@ -64,6 +65,7 @@ class App extends Component {
 			Last updated: {this.state.lastWind.timestamp} <br />
 		</pre>
 		<Compass lastRecord={this.state.lastGps}></Compass>
+		  <Map></Map>
       </div>
     );
   }
