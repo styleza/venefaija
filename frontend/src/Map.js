@@ -9,8 +9,8 @@ import * as Leaf from 'leaflet'
 import {computeDestinationPoint} from 'geolib';
 import Atom from 'bacon.atom';
 import api from './api'
-import connect from './location-provider';
-import settings from './settings'
+
+
 //import world_base from './world-base.geo.js'
 const COG = 'COG';
 const MAX_ZOOM = 16;
@@ -18,11 +18,12 @@ const MIN_ZOOM = 6;
 const EXTENSION_LINE_OFF = 'Off';
 
 const drawObject = Atom({distance: 0, del: false});
-const connection = connect();
+
+
 
 class Map extends Component {
     componentDidMount() {
-        initMap(connection, settings, drawObject)
+        initMap(this.props.connection, this.props.settings, drawObject)
     }
     render() {
         return (<div id="map" />)
@@ -49,8 +50,8 @@ function initMap(connection, settings, drawObject) {
         attributionControl: false
     })
     window.map = map
+    console.log(settings);
     initialSettings.worldBaseChart && addBasemap(map)
-
     addCharts(map, initialSettings.chartProviders, settings.map('.chartProviders'))
     const vesselIcons = createVesselIcons(_.get(initialSettings.data, ['0', 'type']) === 'geolocation')
 
@@ -80,11 +81,11 @@ function initMap(connection, settings, drawObject) {
 
         const course =
             settings.course === COG ? vesselData['navigation.courseOverGroundTrue'] : vesselData['navigation.headingTrue']
-        if (course) {
+        /*if (course) {
             myVessel.setRotationAngle(toDegrees(course))
         } else {
             myVessel.setRotationAngle(0)
-        }
+        }*/
 
         const speed = vesselData['navigation.speedOverGround']
         const extensionLineCoordinates = calculateExtensionLine(position, course, speed, settings.extensionLine)
@@ -218,6 +219,7 @@ function handleDrawPath({map, settings, drawObject}) {
 }
 
 function addCharts(map, providers, providersP) {
+    console.log(providers);
     // Initialize charts based on initial providers
     const mapLayers = _.map(providers, provider => {
         const {index, name, maxzoom, minzoom, tilemapUrl, enabled, type, center} = provider
@@ -236,7 +238,8 @@ function addCharts(map, providers, providersP) {
         // 'detectRetina' messes up Leaflet maxNativeZoom, fix with a hack:
         const maxNativeZoom = maxzoom ? maxzoom - (Leaf.Browser.retina ? 1 : 0) : undefined
         const minNativeZoom = minzoom ? minzoom + (Leaf.Browser.retina ? 1 : 0) : undefined
-        const layer = Leaf.tileLayer(tilemapUrl, {detectRetina: true, bounds, maxNativeZoom, minNativeZoom, pane})
+        let url = 'http://192.168.0.192:4999'+tilemapUrl;
+        const layer = Leaf.tileLayer(url, {detectRetina: true, bounds, maxNativeZoom, minNativeZoom, pane})
 
         if (enabled) {
             layer.addTo(map)
@@ -255,6 +258,8 @@ function addCharts(map, providers, providersP) {
         .skip(1)
         .onValue(providers => {
             _.each(providers, ({enabled, id}) => {
+                console.log(mapLayers);
+                console.log(id);
                 const mapLayer = _.find(mapLayers, ({provider}) => provider.id === id)
                 if (enabled) {
                     mapLayer.layer.addTo(map)

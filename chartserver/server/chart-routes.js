@@ -36,8 +36,10 @@ api.get('/charts/:map/:z/:x/:y', (req, res) => {
     res.sendStatus(404)
     return
   }
+
   provider.db.getTile(z, x, y, (err, tile, headers) => {
     if (err && err.message && err.message === 'Tile does not exist') {
+      console.log(z,x,y);
       res.sendStatus(404)
     } else if (err) {
       console.error(`Error fetching tile ${map}/${z}/${x}/${y}:`, err)
@@ -84,6 +86,7 @@ function chartFileToProvider(uri) {
   })
   return bus.flatMap(db => {
     return Bacon.fromNodeCallback(db, 'getInfo').map(metadata => {
+      console.log(metadata);
       const fromMetadata = _.pick(metadata, [
         'bounds',
         'minzoom',

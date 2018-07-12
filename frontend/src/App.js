@@ -4,6 +4,9 @@ import './App.css';
 import SQL from 'sql.js';
 import axios from 'axios';
 import './../node_modules/leaflet/dist/leaflet.css'
+import connect from './location-provider';
+import _settings from './settings'
+import * as L from 'partial.lenses'
 
 import Compass from './Compass.js';
 import Map from './Map.js';
@@ -13,14 +16,20 @@ class App extends Component {
 		this.database = false;
 		this.state = {
 			lastGps: false,
-			lastWind: false
+			lastWind: false,
+			mapOpen:false,
+            connection: connect(this.getdata.bind(this)),
 		}
+		this.settings = _settings;
 	}
 	loaddatabase() {
 		axios.get('/database.db', {responseType:'arraybuffer'})
 			.then((resp) => {
 				this.database = new SQL.Database(new Uint8Array(resp.data));
 			});
+	}
+	getdata(){
+		return this.state.lastGps;
 	}
 	_parseResult(result){
 		let returnValue = [];
@@ -44,12 +53,20 @@ class App extends Component {
 		};
 		this.setState(newState);
 	}
+    openmap(){
+		this.setState({mapOpen:true});
+	}
+	setfollow(){
+        this.settings.view(L.prop('follow')).modify(v => !v);
+	}
   render() {
     return (
       <div className="App">
         <p className="App-buttons">
 		  <button onClick={this.loaddatabase.bind(this)}>LATAA DEEBEE</button>
 		  <button onClick={this.getlatestinfofromdb.bind(this)}>PÄIVITÄ INFO</button>
+			<button onClick={this.openmap.bind(this)}>Avaa KARTTE</button>
+			<button onClick={this.setfollow.bind(this)}>Aseta FOLLOW</button>
         </p>
 		<pre>
 			<b>GPS</b> <br />
@@ -65,7 +82,7 @@ class App extends Component {
 			Last updated: {this.state.lastWind.timestamp} <br />
 		</pre>
 		<Compass lastRecord={this.state.lastGps}></Compass>
-		  <Map></Map>
+		  {this.state.mapOpen && (<Map connection={this.state.connection} settings={this.settings}></Map>)}
       </div>
     );
   }

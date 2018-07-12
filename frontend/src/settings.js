@@ -31,7 +31,9 @@ const defaultSettings = {
 const fromLocalStorage = Store.get(LOCAL_STORAGE_KEY) || {}
 
 const charts = _.get(window.INITIAL_SETTINGS, 'charts', [])
+console.log(charts);
 const settings = Atom(_.assign(defaultSettings, _.omit(window.INITIAL_SETTINGS, ['charts']) || {}, fromLocalStorage))
+
 
 const chartProviders = Bacon.fromArray(charts)
   .flatMap(provider => {
@@ -45,6 +47,7 @@ const chartProviders = Bacon.fromArray(charts)
     }
   })
   .fold([], _.concat)
+
 
 chartProviders.onValue(charts => {
   settings.view(L.prop('chartProviders')).set(charts)
@@ -67,9 +70,11 @@ settings
     Store.set(LOCAL_STORAGE_KEY, v)
   })
 
+console.log("SETTINGSIT:");
+console.log(settings);
 function fetchLocalCharts(provider, hiddenChartProviders) {
-  const url = '/charts/'
-  return api
+  const url = 'http://192.168.0.192:4999/charts/'
+  let z = api
     .get({url})
     .map(_.values)
     .flatMap(charts => {
@@ -87,17 +92,20 @@ function fetchLocalCharts(provider, hiddenChartProviders) {
             'format',
             'bounds'
           ])
-          return _.merge(
+          let y= _.merge(
             {
               id: chart.name,
               index: provider.index || 0,
-              enabled: isChartHidden(hiddenChartProviders, chart.name)
+              enabled: true
             },
             from
-          )
+          );
+          return y;
         })
       )
     })
+
+  return z;
 }
 
 function fetchSignalKCharts(provider, hiddenChartProviders) {
@@ -142,18 +150,18 @@ const isChartHidden = (hiddenChartProviders, requestedChartId) => {
 
 function parseChartProviderAddress(address) {
   if (_.isEmpty(address)) {
+      console.log('neeger');
     throw 'Empty chart provider address!'
   }
   if (_.isEmpty(address.split(':')[0])) {
     // Relative address such as ':80'
-    return `${window.location.protocol}//${window.location.hostname}:${address.split(':')[1]}`
+    return `${window.location.protocol}//${window.location.hostname}:4999}`
   } else {
-    return address
+    return 'http://192.168.0.192:4999/charts'
   }
 }
 
 function clearSettingsFromLocalStorage() {
   Store.remove(LOCAL_STORAGE_KEY)
 }
-
 export default settings
