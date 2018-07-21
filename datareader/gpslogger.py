@@ -5,7 +5,7 @@ import time
 session = gps.gps("localhost", "2947")
 session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
 
-conn = sqlite3.connect('../database/database.db')
+conn = sqlite3.connect('database/database.db')
 c = conn.cursor()
 READ_TIME=5
 

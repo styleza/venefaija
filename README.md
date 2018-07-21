@@ -77,17 +77,32 @@ Run in root directory of this project
 ### Data readers
 You can run _debug.py files as follows: `python gpslogger_debug.py` or `python windmeter_debug.py`
 
-To start the the constant data logging run monitor.sh
+To start the the constant data logging run monitor.sh in root folder
 
 You should also add following line to the crontab to make sure that all data readers are constantly and always running
-`* * * * * [folder]/venefaija/datareader/monitor.sh >> /var/log/monitor_venefaija.log 2>&1`
+`* * * * * [folder]/venefaija/monitor.sh >> /var/log/monitor_venefaija.log 2>&1`
 
 ### Frontend
 To install dependecies run `npm install`
 
-To build the frontend run `npm run build`
+To build the frontend run `REACT_APP_CHART_SERVER_URL= npm run build`
 
-To start development server run `npm run start`
+To start development server run `REACT_APP_CHART_SERVER_URL=<here goes your chart server url for> npm run start`
+chart server url can be for example http://localhost:4999 
+
+
+#### configure nginx
+add 
+``` 
+location /charts {
+    proxy_pass http://127.0.0.1:4999/charts;
+}
+``` 
+to the nginx default config file
+
+#### build frontend
+See above
+and then run `npm run deploy`
 
 ### API
 @TODO

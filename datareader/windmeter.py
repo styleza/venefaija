@@ -33,22 +33,22 @@ READ_PIN=3
 READ_TIME=5
 
 LOOKUP_TABLE=[
-        {'direction': 0, 'data': 1599},
-        {'direction': 22.5, 'data': 1522},
-        {'direction': 45, 'data': 1562},
-        {'direction': 67.5, 'data': 1426},
-        {'direction': 90, 'data': 1492},
-        {'direction': 112.5, 'data': 1092},
-        {'direction': 135, 'data': 1171},
-        {'direction': 157.5, 'data': 350},
-        {'direction': 180, 'data': 382},
-        {'direction': 202.5, 'data': 283},
-        {'direction': 225, 'data': 655},
-        {'direction': 247.5, 'data': 490},
-        {'direction': 270, 'data': 889},
-        {'direction': 292.5, 'data': 799},
-        {'direction': 315, 'data': 1362},
-        {'direction': 337.5, 'data': 1331}
+        {'direction': 0, 'data': 1516},
+        {'direction': 22.5, 'data': 1328},
+        {'direction': 45, 'data': 1423},
+        {'direction': 67.5, 'data': 1128},
+        {'direction': 90, 'data': 1261},
+        {'direction': 112.5, 'data': 655},
+        {'direction': 135, 'data': 744},
+        {'direction': 157.5, 'data': 137},
+        {'direction': 180, 'data': 151},
+        {'direction': 202.5, 'data': 107},
+        {'direction': 225, 'data': 298},
+        {'direction': 247.5, 'data': 204},
+        {'direction': 270, 'data': 463},
+        {'direction': 292.5, 'data': 395},
+        {'direction': 315, 'data': 1015},
+        {'direction': 337.5, 'data': 965}
 ]
 
 def calculate_speed(time_sec):
@@ -69,7 +69,7 @@ def spin(negger):
 
 GPIO.add_event_detect(PIN,GPIO.RISING,callback=spin)
 
-conn = sqlite3.connect('../database/database.db')
+conn = sqlite3.connect('database/database.db')
 c = conn.cursor()
 
 

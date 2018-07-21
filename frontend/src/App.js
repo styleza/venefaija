@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import SQL from 'sql.js';
 import axios from 'axios';
@@ -7,9 +6,10 @@ import './../node_modules/leaflet/dist/leaflet.css'
 import connect from './location-provider';
 import _settings from './settings'
 import * as L from 'partial.lenses'
-
+import Info from './Info';
 import Compass from './Compass.js';
 import Map from './Map.js';
+
 class App extends Component {
 	constructor(props) {
 		super(props);
@@ -21,18 +21,24 @@ class App extends Component {
             connection: connect(this.getdata.bind(this)),
 		}
 		this.settings = _settings;
+		this.mapTimeout = window.setTimeout(this.openmap.bind(this),2000);
+		this.dbReloader = window.setInterval(this.loaddatabase.bind(this), 5000);
+        this.loaddatabase();
+        console.log(process.env);
+
 	}
 	loaddatabase() {
 		axios.get('/database.db', {responseType:'arraybuffer'})
 			.then((resp) => {
 				this.database = new SQL.Database(new Uint8Array(resp.data));
+                this.getlatestinfofromdb();
+                this.database.close();
 			});
 	}
 	getdata(){
 		return this.state.lastGps;
 	}
 	_parseResult(result){
-		let returnValue = [];
 		return result.values.map(
 			(resultRow) => resultRow.reduce(
 				(r, c, i) => {
@@ -61,27 +67,24 @@ class App extends Component {
 	}
   render() {
     return (
-      <div className="App">
-        <p className="App-buttons">
-		  <button onClick={this.loaddatabase.bind(this)}>LATAA DEEBEE</button>
-		  <button onClick={this.getlatestinfofromdb.bind(this)}>PÄIVITÄ INFO</button>
-			<button onClick={this.openmap.bind(this)}>Avaa KARTTE</button>
-			<button onClick={this.setfollow.bind(this)}>Aseta FOLLOW</button>
-        </p>
-		<pre>
-			<b>GPS</b> <br />
-			Elevation: {this.state.lastGps.elevation} <br />
-			Heading: {this.state.lastGps.heading} <br />
-			Lat: {this.state.lastGps.lat} <br />
-			Lon: {this.state.lastGps.lon} <br />
-			Speed: {this.state.lastGps.speed} <br />
+      <div style={{height:0}}>
+		  <p className="controls-on-top">
+			  <button onClick={this.setfollow.bind(this)}>F</button>
+		  </p>
+		<pre className="raw-data-on-top">
+			<b>GPS (G):</b>
+			Elevation: {this.state.lastGps.elevation} /
+			Heading: {this.state.lastGps.heading} /
+			Speed: {this.state.lastGps.speed} /
 			Last updated: {this.state.lastGps.timestamp} <br />
-			<b>Wind</b> <br />
-			Direction: {this.state.lastWind.direction} <br />
-			Speed: {this.state.lastWind.speed} <br />
-			Last updated: {this.state.lastWind.timestamp} <br />
+			<b>Wind (W):</b>
+			Direction: {this.state.lastWind.direction} /
+			Speed: {this.state.lastWind.speed} /
+			Last updated: {this.state.lastWind.timestamp}
 		</pre>
-		<Compass lastRecord={this.state.lastGps}></Compass>
+		  <Info name="WS" value={this.state.lastWind.speed}></Info>
+		  <Compass name="GD" compass_value={this.state.lastGps.heading}></Compass>
+		  <Compass name="WD" compass_value={this.state.lastWind.direction}></Compass>
 		  {this.state.mapOpen && (<Map connection={this.state.connection} settings={this.settings}></Map>)}
       </div>
     );

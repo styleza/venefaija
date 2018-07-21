@@ -16,9 +16,9 @@ adc = Adafruit_ADS1x15.ADS1015()
 # See table 3 in the ADS1015/ADS1115 datasheet for more info on gain.
 GAIN = 1
 READ_PIN=3
-READ_TIME=5
+READ_TIME=0.5
 
-LOOKUP_TABLE=[
+'''LOOKUP_TABLE=[
         {'direction': 0, 'data': 1599},
         {'direction': 22.5, 'data': 1522},
         {'direction': 45, 'data': 1562},
@@ -35,10 +35,30 @@ LOOKUP_TABLE=[
         {'direction': 292.5, 'data': 799},
         {'direction': 315, 'data': 1362},
         {'direction': 337.5, 'data': 1331}
+]'''
+
+LOOKUP_TABLE=[
+        {'direction': 0, 'data': 1516},
+        {'direction': 22.5, 'data': 1328},
+        {'direction': 45, 'data': 1423},
+        {'direction': 67.5, 'data': 1128},
+        {'direction': 90, 'data': 1261},
+        {'direction': 112.5, 'data': 655},
+        {'direction': 135, 'data': 744},
+        {'direction': 157.5, 'data': 137},
+        {'direction': 180, 'data': 151},
+        {'direction': 202.5, 'data': 107},
+        {'direction': 225, 'data': 298},
+        {'direction': 247.5, 'data': 204},
+        {'direction': 270, 'data': 463},
+        {'direction': 292.5, 'data': 395},
+        {'direction': 315, 'data': 1015},
+        {'direction': 337.5, 'data': 965}
 ]
 
 while True:
     value = adc.read_adc(READ_PIN, gain=GAIN)
+    print value
     direction_data = [x for x in LOOKUP_TABLE if x['data']-5 < value and x['data']+5 > value]
     if(len(direction_data) != 1):
       print "ERRROR"

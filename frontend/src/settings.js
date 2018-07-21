@@ -5,9 +5,6 @@ import _ from 'lodash'
 import api from './api'
 import * as L from 'partial.lenses'
 const COG = 'COG';
-const MAX_ZOOM = 16;
-const MIN_ZOOM = 6;
-const EXTENSION_LINE_OFF = 'Off';
 
 const LOCAL_STORAGE_KEY = 'plotter-settings'
 const defaultSettings = {
@@ -40,8 +37,6 @@ const chartProviders = Bacon.fromArray(charts)
     switch (provider.type) {
       case 'local':
         return fetchLocalCharts(provider, fromLocalStorage.hiddenChartProviders)
-      case 'signalk':
-        return fetchSignalKCharts(provider, fromLocalStorage.hiddenChartProviders)
       default:
         return Bacon.once(provider)
     }
@@ -70,10 +65,8 @@ settings
     Store.set(LOCAL_STORAGE_KEY, v)
   })
 
-console.log("SETTINGSIT:");
-console.log(settings);
 function fetchLocalCharts(provider, hiddenChartProviders) {
-  const url = 'http://192.168.0.192:4999/charts/'
+  const url = process.env.REACT_APP_CHART_SERVER_URL+'/charts/'
   let z = api
     .get({url})
     .map(_.values)
@@ -108,60 +101,4 @@ function fetchLocalCharts(provider, hiddenChartProviders) {
   return z;
 }
 
-function fetchSignalKCharts(provider, hiddenChartProviders) {
-  const address = parseChartProviderAddress(provider.address)
-  const url = `${address}/signalk/v1/api/resources/charts`
-  return api
-    .get({url})
-    .map(_.values)
-    .flatMap(charts => {
-      return Bacon.fromArray(
-        _.map(charts, chart => {
-          const tilemapUrl = address + chart.tilemapUrl
-          const from = _.pick(chart, [
-            'type',
-            'name',
-            'minzoom',
-            'maxzoom',
-            'center',
-            'description',
-            'format',
-            'bounds'
-          ])
-          return _.merge(
-            {
-              id: chart.name,
-              tilemapUrl,
-              minzoom: MIN_ZOOM,
-              maxzoom: MAX_ZOOM,
-              index: provider.index || 0,
-              enabled: !isChartHidden(hiddenChartProviders, chart.name)
-            },
-            from
-          )
-        })
-      )
-    })
-}
-
-const isChartHidden = (hiddenChartProviders, requestedChartId) => {
-  return !!_.find(hiddenChartProviders, id => id === requestedChartId)
-}
-
-function parseChartProviderAddress(address) {
-  if (_.isEmpty(address)) {
-      console.log('neeger');
-    throw 'Empty chart provider address!'
-  }
-  if (_.isEmpty(address.split(':')[0])) {
-    // Relative address such as ':80'
-    return `${window.location.protocol}//${window.location.hostname}:4999}`
-  } else {
-    return 'http://192.168.0.192:4999/charts'
-  }
-}
-
-function clearSettingsFromLocalStorage() {
-  Store.remove(LOCAL_STORAGE_KEY)
-}
 export default settings

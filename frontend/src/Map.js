@@ -3,16 +3,15 @@
 import React, {Component} from 'react'
 import * as L from 'partial.lenses'
 import Bacon from 'baconjs'
-import classNames from 'classnames'
 import _ from 'lodash'
 import * as Leaf from 'leaflet'
+
+// eslint-disable-next-line
+import LeafletRotatedMarker from 'leaflet-rotatedmarker'
 import {computeDestinationPoint} from 'geolib';
 import Atom from 'bacon.atom';
 import api from './api'
 
-
-//import world_base from './world-base.geo.js'
-const COG = 'COG';
 const MAX_ZOOM = 16;
 const MIN_ZOOM = 6;
 const EXTENSION_LINE_OFF = 'Off';
@@ -50,7 +49,6 @@ function initMap(connection, settings, drawObject) {
         attributionControl: false
     })
     window.map = map
-    console.log(settings);
     initialSettings.worldBaseChart && addBasemap(map)
     addCharts(map, initialSettings.chartProviders, settings.map('.chartProviders'))
     const vesselIcons = createVesselIcons(_.get(initialSettings.data, ['0', 'type']) === 'geolocation')
@@ -63,9 +61,9 @@ function initMap(connection, settings, drawObject) {
         rotationAngle: 0
     })
     myVessel.addTo(map)
-    const pointerEnd = Leaf.circle([0, 0], {radius: 20, color: 'red', fillOpacity: 0})
+    const pointerEnd = Leaf.circle([0, 0], {zIndexOffset: 99999, radius: 20, color: 'red', fillOpacity: 0})
     pointerEnd.addTo(map)
-    const pointer = Leaf.polyline([], {color: 'red'})
+    const pointer = Leaf.polyline([], {zIndexOffset: 99999, color: 'red'})
     pointer.addTo(map)
 
     const vesselData = Bacon.combineTemplate({
@@ -79,16 +77,16 @@ function initMap(connection, settings, drawObject) {
             myVessel.setLatLng(newPos)
         }
 
-        const course =
-            settings.course === COG ? vesselData['navigation.courseOverGroundTrue'] : vesselData['navigation.headingTrue']
-        /*if (course) {
-            myVessel.setRotationAngle(toDegrees(course))
+        const course =  vesselData['navigation.headingTrue']
+
+        if (course) {
+            myVessel.setRotationAngle(toDegrees(course.value))
         } else {
             myVessel.setRotationAngle(0)
-        }*/
+        }
 
-        const speed = vesselData['navigation.speedOverGround']
-        const extensionLineCoordinates = calculateExtensionLine(position, course, speed, settings.extensionLine)
+        const speed = vesselData['navigation.speedOverGround'];
+        const extensionLineCoordinates = calculateExtensionLine(position, course, speed, settings.extensionLine);
         if (extensionLineCoordinates) {
             pointer.setLatLngs([extensionLineCoordinates.start, extensionLineCoordinates.end])
             pointerEnd.setLatLng(extensionLineCoordinates.end)
@@ -219,7 +217,6 @@ function handleDrawPath({map, settings, drawObject}) {
 }
 
 function addCharts(map, providers, providersP) {
-    console.log(providers);
     // Initialize charts based on initial providers
     const mapLayers = _.map(providers, provider => {
         const {index, name, maxzoom, minzoom, tilemapUrl, enabled, type, center} = provider
@@ -238,7 +235,7 @@ function addCharts(map, providers, providersP) {
         // 'detectRetina' messes up Leaflet maxNativeZoom, fix with a hack:
         const maxNativeZoom = maxzoom ? maxzoom - (Leaf.Browser.retina ? 1 : 0) : undefined
         const minNativeZoom = minzoom ? minzoom + (Leaf.Browser.retina ? 1 : 0) : undefined
-        let url = 'http://192.168.0.192:4999'+tilemapUrl;
+        let url = process.env.REACT_APP_CHART_SERVER_URL+tilemapUrl;
         const layer = Leaf.tileLayer(url, {detectRetina: true, bounds, maxNativeZoom, minNativeZoom, pane})
 
         if (enabled) {
@@ -258,8 +255,6 @@ function addCharts(map, providers, providersP) {
         .skip(1)
         .onValue(providers => {
             _.each(providers, ({enabled, id}) => {
-                console.log(mapLayers);
-                console.log(id);
                 const mapLayer = _.find(mapLayers, ({provider}) => provider.id === id)
                 if (enabled) {
                     mapLayer.layer.addTo(map)
@@ -289,7 +284,7 @@ function calculateExtensionLine(position, course, speed, extensionLineSetting) {
     if (extensionLineSetting === EXTENSION_LINE_OFF) {
         return undefined
     }
-    const time = 60 * parseInt(extensionLineSetting)
+    const time = 60 * parseInt(extensionLineSetting,10)
     if (position && position.latitude && position.longitude && course && speed > 0.5) {
         const distance = speed * time // Speed in m/s
         const start = [position.latitude, position.longitude]

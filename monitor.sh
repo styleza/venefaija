@@ -10,16 +10,28 @@ function start_process_and_lock {
 	echo $! > $lockfilelocation$processID
 }
 
+function archive_db {
+	local db_from="database/database.db"
+	local db_to="database/database_`date +%Y%m%d%H%M`.db"
+	log "Archiving db..."
+	mv $db_from $db_to
+	sqlite3 $db_from < database/init.sql
+	log "DB archived as "$db_to
+}
+
 function start_windmeter {
-	start_process_and_lock windmeter "python windmeter.py"
+	start_process_and_lock windmeter "python datareader/windmeter.py"
 }
 
 function start_gpslogger {
-	start_process_and_lock gpslogger "python gpslogger.py"
+	start_process_and_lock gpslogger "python datareader/gpslogger.py"
 }
 
 function start_tempmeter {
 	log "tempmeter not implemented"
+}
+function start_chartserver {
+	start_process_and_lock chartserver "CHARTS_PATH=chartserver/charts/ node chartserver/index.js"
 }
 
 function is_process_running {
@@ -34,8 +46,16 @@ function is_process_running {
 function log {
 	local logstring="`date` $1"
 	echo $logstring
-	echo $logstring >> ../logs/monitor.log
+	echo $logstring >> logs/monitor.log
 }
+
+last_uptime_check=`cat $lockfilelocation"archive"`
+
+if [ ! -e $lockfilelocation"archive" ] || [ "$last_uptime_check" !=  "`uptime -s`" ] ; then
+	archive_db
+	uptime -s > $lockfilelocation"archive"
+fi
+
 
 if [ $(is_process_running windmeter) -eq 0 ]; then
 	log "Stargin windmeter"
@@ -56,5 +76,12 @@ if [ $(is_process_running tempmeter) -eq 0 ]; then
         start_tempmeter
 else
         log "Tempmeter running"
+fi
+
+if [ $(is_process_running chartserver) -eq 0 ]; then
+        log "Stargin chartserver"
+        start_chartserver
+else
+        log "chartserver running"
 fi
 
