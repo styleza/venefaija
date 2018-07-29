@@ -49,8 +49,15 @@ class App extends Component {
 		);
 	}
 	_getLatestDataRow(dataType){
-		let data = this.database.exec(`select * from ${dataType} order by timestamp desc limit 1`)[0];
-		return this._parseResult(data)[0];
+		try {
+            let data = this.database.exec(`select * from ${dataType} order by timestamp desc limit 1`)[0];
+            return this._parseResult(data)[0];
+		}
+		catch (err){
+			console.log(err);
+			return false;
+		}
+
 	}
 	getlatestinfofromdb(){
 		let newState = {
@@ -73,16 +80,16 @@ class App extends Component {
 		  </p>
 		<pre className="raw-data-on-top">
 			<b>GPS (G):</b>
-			Elevation: {this.state.lastGps.elevation} /
-			Heading: {this.state.lastGps.heading} /
-			Speed: {this.state.lastGps.speed} /
-			Lon: {this.state.lastGps.lon} /
-			Lat: {this.state.lastGps.lat} /
-			Last updated: {this.state.lastGps.timestamp} <br />
+			Elevation: {this.state.lastGps && this.state.lastGps.elevation} /
+			Heading: {this.state.lastGps && this.state.lastGps.heading} /
+			Speed: {this.state.lastGps && this.state.lastGps.speed} /
+			Lon: {this.state.lastGps && this.state.lastGps.lon} /
+			Lat: {this.state.lastGps && this.state.lastGps.lat} /
+			Last updated: {this.state.lastGps && this.state.lastGps.timestamp} <br />
 			<b>Wind (W):</b>
-			Direction: {this.state.lastWind.direction} /
-			Speed: {this.state.lastWind.speed} /
-			Last updated: {this.state.lastWind.timestamp}
+			Direction: {this.state.lastWind && this.state.lastWind.direction} /
+			Speed: {this.state.lastWind && this.state.lastWind.speed} /
+			Last updated: {this.state.lastWind && this.state.lastWind.timestamp}
 		</pre>
 		  <Info name="WS" value={this.state.lastWind.speed}></Info>
 		  <Compass name="GD" compass_value={this.state.lastGps.heading}></Compass>
