@@ -59,7 +59,7 @@ LOOKUP_TABLE=[
 while True:
     value = adc.read_adc(READ_PIN, gain=GAIN)
     print value
-    direction_data = [x for x in LOOKUP_TABLE if x['data']-5 < value and x['data']+5 > value]
+    direction_data = [x for x in LOOKUP_TABLE if x['data']-10 < value and x['data']+10 > value]
     if(len(direction_data) != 1):
       print "ERRROR"
       continue

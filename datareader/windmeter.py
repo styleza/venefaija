@@ -99,6 +99,6 @@ while True:
         count = 0
     direction = most_common(dir)
     real_speed = mean(speed)
-    c.execute("INSERT INTO wind_records (speed,direction) VALUES ("+str(real_speed)+","+str(direction)+")")
+    c.execute("INSERT INTO wind_records (speed,direction) VALUES ("+str(real_speed)+","+str(direction if direction else "null")+")")
     conn.commit()
 
