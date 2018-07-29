@@ -5,7 +5,9 @@
 * python
 * npm
 * sqlite
-
+* nginx (see nginx_setup.md)
+### Optional
+* autossh (see autossh_setup.md)
 
 ## Folder/module structure
 
