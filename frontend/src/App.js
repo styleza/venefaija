@@ -76,6 +76,8 @@ class App extends Component {
 			Elevation: {this.state.lastGps.elevation} /
 			Heading: {this.state.lastGps.heading} /
 			Speed: {this.state.lastGps.speed} /
+			Lon: {this.state.lastGps.lon} /
+			Lat: {this.state.lastGps.lat} /
 			Last updated: {this.state.lastGps.timestamp} <br />
 			<b>Wind (W):</b>
 			Direction: {this.state.lastWind.direction} /
