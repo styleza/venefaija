@@ -28,7 +28,7 @@ function start_gpslogger {
 }
 
 function start_tempmeter {
-	log "tempmeter not implemented"
+	start_process_and_lock tempmeter "python datareader/tempmeter.py"
 }
 
 function start_chartserver {
