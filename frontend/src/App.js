@@ -17,12 +17,14 @@ class App extends Component {
 		this.state = {
 			lastGps: false,
 			lastWind: false,
+			lastTemp: false,
 			mapOpen:false,
             connection: connect(this.getdata.bind(this)),
 		}
 		this.settings = _settings;
 		this.mapTimeout = window.setTimeout(this.openmap.bind(this),2000);
-		this.dbReloader = window.setInterval(this.loaddatabase.bind(this), 5000);
+		this.dbReloader = window.setInterval(this.loaddatabase.bind(this),
+			window.location.hash ? parseInt(window.location.hash.substring(1), 10)*1000 : 5000);
         this.loaddatabase();
 	}
 	loaddatabase() {
@@ -60,7 +62,8 @@ class App extends Component {
 	getlatestinfofromdb(){
 		let newState = {
 			lastGps: this._getLatestDataRow('gps_records'),
-			lastWind: this._getLatestDataRow('wind_records')
+			lastWind: this._getLatestDataRow('wind_records'),
+			lastTemp: this._getLatestDataRow('temp_records')
 		};
 		this.setState(newState);
 	}
@@ -89,9 +92,10 @@ class App extends Component {
 			Speed: {this.state.lastWind && this.state.lastWind.speed} /
 			Last updated: {this.state.lastWind && this.state.lastWind.timestamp}
 		</pre>
-		  <Info name="WS" value={this.state.lastWind.speed}></Info>
-		  <Compass name="GD" compass_value={this.state.lastGps.heading}></Compass>
-		  <Compass name="WD" compass_value={this.state.lastWind.direction}></Compass>
+		  {this.state.lastTemp && (<Info name="TEMP" value={this.state.lastTemp.temp}></Info>)}
+		  {this.state.lastWind && (<Info name="WS" value={this.state.lastWind.speed}></Info>)}
+		  {this.state.lastGps && (<Compass name="GD" compass_value={this.state.lastGps.heading}></Compass>)}
+		  {this.state.lastWind && (<Compass name="WD" compass_value={this.state.lastWind.direction}></Compass>)}
 		  {this.state.mapOpen && (<Map connection={this.state.connection} settings={this.settings}></Map>)}
       </div>
     );
