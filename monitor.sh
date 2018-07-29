@@ -30,8 +30,13 @@ function start_gpslogger {
 function start_tempmeter {
 	log "tempmeter not implemented"
 }
+
 function start_chartserver {
 	start_process_and_lock chartserver "CHARTS_PATH=chartserver/charts/ node chartserver/index.js"
+}
+
+function start_gpsd {
+    start_process_and_lock gpsd "/usr/sbin/gpsd /dev/ttyS0 -F /var/run/gpsd.sock"
 }
 
 function is_process_running {
@@ -52,34 +57,41 @@ function log {
 last_uptime_check=`cat $lockfilelocation"archive"`
 
 if [ ! -e $lockfilelocation"archive" ] || [ "$last_uptime_check" !=  "`uptime -s`" ] ; then
+	sakis3g connect --console --interactive APN=CUSTOM_APN CUSTOM_APN='internet' APN_USER='0' APN_PASS='0' USBINTERFACE=0 USBMODEM=12d1:14ac OTHER=USBMODEM MODEM=OTHER &
 	archive_db
 	uptime -s > $lockfilelocation"archive"
 fi
 
+if [ $(is_process_running gpsd) -eq 0 ]; then
+	log "Starting GPSD"
+	start_gpsd
+else
+	log "Starting running"
+fi
 
 if [ $(is_process_running windmeter) -eq 0 ]; then
-	log "Stargin windmeter"
+	log "Starting windmeter"
 	start_windmeter
 else
 	log "Wind meter running"
 fi
 
 if [ $(is_process_running gpslogger) -eq 0 ]; then
-        log "Stargin GPS logger"
+        log "Starting GPS logger"
         start_gpslogger
 else
         log "GPS logger running"
 fi
 
 if [ $(is_process_running tempmeter) -eq 0 ]; then
-        log "Stargin tempmeter"
+        log "Starting tempmeter"
         start_tempmeter
 else
         log "Tempmeter running"
 fi
 
 if [ $(is_process_running chartserver) -eq 0 ]; then
-        log "Stargin chartserver"
+        log "Starting chartserver"
         start_chartserver
 else
         log "chartserver running"

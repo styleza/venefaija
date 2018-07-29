@@ -18,7 +18,7 @@ ADJUSTMENT = 1.18	# Adjustment for weight of cups
 CM_IN_A_KM = 100000.0
 SECS_IN_AN_HOUR = 3600
 
-adc = Adafruit_ADS1x15.ADS1015()
+adc = Adafruit_ADS1x15.ADS1015(address=0x48, busnum=1)
 # Choose a gain of 1 for reading voltages from 0 to 4.09V.
 # Or pick a different gain to change the range of voltages that are read:
 #  - 2/3 = +/-6.144V
