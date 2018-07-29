@@ -5,6 +5,7 @@
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
     "@fortawesome/fontawesome-free-solid": "^5.0.13",
+    "@fortawesome/fontawesome-svg-core": "^1.2.2",
     "@fortawesome/react-fontawesome": "^0.1.0",
     "axios": "^0.18.0",
     "bacon.atom": "^5.0.5",
@@ -30,6 +31,7 @@
     "build": "REACT_APP_CHART_SERVER_URL= react-scripts build && rm build/database.db",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "deploy": "cp -r build/* /var/www/html/"
+    "deploy": "cp -r build/* /var/www/html/",
+    "deploy-rpi": "rsync -avz -e 'ssh -p 2222' build/ pi@localhost:/var/www/html/"
   }
 }
