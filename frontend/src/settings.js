@@ -28,7 +28,6 @@ const defaultSettings = {
 const fromLocalStorage = Store.get(LOCAL_STORAGE_KEY) || {}
 
 const charts = _.get(window.INITIAL_SETTINGS, 'charts', [])
-console.log(charts);
 const settings = Atom(_.assign(defaultSettings, _.omit(window.INITIAL_SETTINGS, ['charts']) || {}, fromLocalStorage))
 
 
