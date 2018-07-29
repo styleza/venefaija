@@ -13,7 +13,8 @@ GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 10 to be an input
 
 count = 0
 radius_cm = 9.0		# Radius of the anemometer
-interval = 5		# How often to report speed
+interval = 10		# How often to report speed
+samplecount = 10	# how many samples should we take in interval
 ADJUSTMENT = 1.18	# Adjustment for weight of cups
 CM_IN_A_KM = 100000.0
 SECS_IN_AN_HOUR = 3600
@@ -29,8 +30,7 @@ adc = Adafruit_ADS1x15.ADS1015(address=0x48, busnum=1)
 #  -  16 = +/-0.256V
 # See table 3 in the ADS1015/ADS1115 datasheet for more info on gain.
 GAIN = 1
-READ_PIN=3
-READ_TIME=5
+READ_PIN=3 # What ADC pin should we read
 
 LOOKUP_TABLE=[
         {'direction': 0, 'data': 1516},
@@ -67,6 +67,21 @@ def spin(negger):
     global count
     count = count + 1
 
+
+def get_direction():
+	global READ_PIN,GAIN,LOOKUP_TABLE
+	value = adc.read_adc(READ_PIN, gain=GAIN)
+	direction_data = [x for x in LOOKUP_TABLE if x['data']-5 < value and x['data']+5 > value]
+	if(len(direction_data) != 1):
+		return False
+	return direction_data[0]['direction']
+
+def most_common(lst):
+	return max(set(lst), key=lst.count)
+
+def mean(lst):
+	return float(sum(lst)) / max(len(lst), 1)
+
 GPIO.add_event_detect(PIN,GPIO.RISING,callback=spin)
 
 conn = sqlite3.connect('database/database.db')
@@ -75,13 +90,15 @@ c = conn.cursor()
 
 while True:
     count = 0
-    sleep(interval)
-
-    value = adc.read_adc(READ_PIN, gain=GAIN)
-    direction_data = [x for x in LOOKUP_TABLE if x['data']-5 < value and x['data']+5 > value]
-    if(len(direction_data) != 1):
-      continue
-    direction = direction_data[0]['direction']
-    c.execute("INSERT INTO wind_records (speed,direction) VALUES ("+str(calculate_speed(interval))+","+str(direction)+")")
+    dir = []
+    speed = []
+    for i in range(0, samplecount):
+        dir.append(get_direction())
+        sleep(interval / samplecount)
+        speed.append(calculate_speed(interval / samplecount))
+        count = 0
+    direction = most_common(dir)
+    real_speed = mean(speed)
+    c.execute("INSERT INTO wind_records (speed,direction) VALUES ("+str(real_speed)+","+str(direction)+")")
     conn.commit()
 
