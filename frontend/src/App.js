@@ -24,8 +24,6 @@ class App extends Component {
 		this.mapTimeout = window.setTimeout(this.openmap.bind(this),2000);
 		this.dbReloader = window.setInterval(this.loaddatabase.bind(this), 5000);
         this.loaddatabase();
-        console.log(process.env);
-
 	}
 	loaddatabase() {
 		axios.get('/database.db', {responseType:'arraybuffer'})
