@@ -1,0 +1,17 @@
+version: '2'
+services:
+  frontend:
+    image: react-docker
+    ports:
+      - 80:80
+    volumes:
+      - ./database:/usr/share/nginx/html/database
+      - ./database/database.db:/usr/share/nginx/html/database/database.db
+  chartserver:
+    image: chartserver
+    ports:
+      - 4999:4999
+    volumes:
+      - /charts:/charts
+    environment:
+      CHARTS_PATH: /charts

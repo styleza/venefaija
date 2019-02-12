@@ -28,7 +28,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "REACT_APP_CHART_SERVER_URL= react-scripts build && rm build/database.db",
+    "build": "REACT_APP_CHART_SERVER_URL= react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "deploy": "cp -r build/* /var/www/html/",
